@@ -5,5 +5,5 @@ go:
 
 env:
   - GO111MODULE=on
-  
- install: true
+
+install: true

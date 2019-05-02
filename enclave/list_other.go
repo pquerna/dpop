@@ -2,6 +2,6 @@
 
 package enclave
 
-func list_keypairs() ([]Keypair, error) {
+func list_keypairs(app string) ([]Keypair, error) {
 	return nil, ErrNoBackend
 }

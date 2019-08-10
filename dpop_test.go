@@ -8,7 +8,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"github.com/davecgh/go-spew/spew"
 	"net/http"
 	"net/url"
 	"testing"
@@ -150,7 +149,6 @@ func TestExchange(t *testing.T) {
 	tb, err := pubkey.Thumbprint(crypto.SHA256)
 	require.NoError(t, err)
 	require.Equal(t, atCnf, base64.URLEncoding.EncodeToString(tb))
-	spew.Dump(atCnf)
 	_, _,_, err = pv.ValidateResourceAccess(rsReq, atCnf)
 	require.NoError(t, err)
 

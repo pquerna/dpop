@@ -2,8 +2,10 @@ package dpop
 
 import (
 	"context"
+	"crypto"
 	"crypto/rand"
 	"crypto/rsa"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -30,19 +32,17 @@ func TestExchange(t *testing.T) {
 	provider := newOIDCTestProvider(t, clientId, "clientsecret")
 
 	provider.tokenMinter = func(req *http.Request, idClaims *jwt.Claims) (*tokenResponse, error) {
-		binding := req.Header.Get(headerBinding)
+		binding := req.Header.Get(httpHeader)
 		require.NotEmpty(t, binding)
 
-		dpopBindingHeader = req.Header.Get(headerBinding)
-		bv := &BindingValidator{}
-		claims, bindingCnf, err := bv.Validate(req)
+		dpopBindingHeader = req.Header.Get(httpHeader)
+		bv := &ProofValidator{}
+		claims, rawClaims, bindingCnf, err := bv.ValidateTokenRequest(req)
 		if err != nil {
 			return nil, err
 		}
-
-		if claims.ClientId != clientId {
-			return nil, fmt.Errorf("Invalid client_id")
-		}
+		_ = claims
+		_ = rawClaims
 
 		builder := jwt.Signed(provider.idSigner)
 		builder = builder.Claims(idClaims)
@@ -54,13 +54,18 @@ func TestExchange(t *testing.T) {
 		atClaims := *idClaims
 		atClaims.Subject = "x1234"
 
+		tb, err := bindingCnf.Thumbprint(crypto.SHA256)
+		if err != nil {
+			return nil, err
+		}
+
 		builder = jwt.Signed(provider.atSigner).
 			Claims(&atClaims).
 			Claims(map[string]interface{}{
 				"client_id": clientId,
 				"scopes":    "openid example.com/api",
 				"cnf": map[string]interface{}{
-					jwtCnfJWK: bindingCnf,
+					jktS256: base64.URLEncoding.EncodeToString(tb),
 				},
 			})
 		accessToken, err := builder.CompactSerialize()
@@ -71,7 +76,7 @@ func TestExchange(t *testing.T) {
 		return &tokenResponse{
 			IDToken:     idToken,
 			AccessToken: accessToken,
-			TokenType:   "Bearer+DPoP",
+			TokenType:   accessTokenType,
 			ExpiresIn:   300,
 		}, nil
 	}
@@ -93,11 +98,11 @@ func TestExchange(t *testing.T) {
 		Algorithm: jose.RS256,
 		Key:       privateKey,
 	}
-	b, err := NewBinding(sk)
+	b, err := New(sk)
 	require.NoError(t, err)
 
-	be := BindingExchange{
-		Binder: b,
+	be := TokenExchange{
+		Proof:  b,
 		Config: config,
 	}
 
@@ -107,14 +112,14 @@ func TestExchange(t *testing.T) {
 		},
 	)
 	require.NoError(t, err)
-	require.Equal(t, accesTokenType, token.TokenType)
+	require.Equal(t, accessTokenType, token.TokenType)
 
-	proofer, err := NewProof(sk)
+	proofer, err := New(sk)
 	require.NoError(t, err)
 
 	rsReq, err := http.NewRequest("GET", "https://example.com/api/magic", nil)
 	require.NoError(t, err)
-	rsReq.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token.AccessToken))
+	rsReq.Header.Set("Authorization", fmt.Sprintf("%s %s", token.TokenType, token.AccessToken))
 
 	err = proofer.ForRequest(rsReq, nil)
 	require.NoError(t, err)
@@ -138,17 +143,19 @@ func TestExchange(t *testing.T) {
 	err = json.Unmarshal(atClaimsRaw, atc)
 	require.NoError(t, err)
 
-	atCnf := atc.Cnf[jwtCnfJWK]
-	require.True(t, atCnf.IsPublic())
-	require.Equal(t, atCnf.Key, skWebKey.Public().Key)
-
-	_, _, err = pv.Validate(rsReq, atCnf)
+	atCnf := atc.Cnf[jktS256]
+	require.NotEmpty(t, atCnf)
+	pubkey := skWebKey.Public()
+	tb, err := pubkey.Thumbprint(crypto.SHA256)
+	require.NoError(t, err)
+	require.Equal(t, atCnf, base64.URLEncoding.EncodeToString(tb))
+	_, _, _, err = pv.ValidateResourceAccess(rsReq, atCnf)
 	require.NoError(t, err)
 
-	t.Logf("DPoP-Binding JWT: %s", dpopBindingHeader)
-	t.Logf("DPoP-Proof JWT: %s", rsReq.Header.Get(headerProof))
+	t.Logf("DPoP Token Exchange JWT: %s", dpopBindingHeader)
+	t.Logf("DPoP Resource Access JWT: %s", rsReq.Header.Get(httpHeader))
 }
 
 type atClaims struct {
-	Cnf map[string]jose.JSONWebKey `json:"cnf,omitempty"`
+	Cnf map[string]string `json:"cnf,omitempty"`
 }

@@ -18,7 +18,6 @@ func main() {
 	app.Commands = cli.Commands{
 		listEnclaveKeysCommand,
 		createKeyCommand,
-		signBinding,
 		signProof,
 	}
 

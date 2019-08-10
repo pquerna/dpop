@@ -2,6 +2,7 @@ package dpop
 
 import (
 	"net/http"
+	"net/url"
 	"time"
 
 	"gopkg.in/square/go-jose.v2"
@@ -9,7 +10,7 @@ import (
 )
 
 type Proof interface {
-	// ForRequest annotates an HTTP Request with a DPoP-Proof header.
+	// ForRequest annotates an HTTP Request with a DPoP header.
 	ForRequest(r *http.Request, extraClaims interface{}) error
 }
 
@@ -19,11 +20,12 @@ type proofer struct {
 	now        func() time.Time
 }
 
-// NewProof creates a Proof that can generate DPoP-Proof headers for a request to a resource server.
-func NewProof(key jose.SigningKey) (Proof, error) {
+// New creates a DPoP Proof that can generate DPoP headers for a request.
+func New(key jose.SigningKey) (Proof, error) {
 	signer, err := jose.NewSigner(key, &jose.SignerOptions{
+		EmbedJWK: true,
 		ExtraHeaders: map[jose.HeaderKey]interface{}{
-			jose.HeaderType: joseProof,
+			jose.HeaderType: typDPOP,
 		},
 	})
 	if err != nil {
@@ -40,6 +42,15 @@ const (
 	proofExp = time.Minute * 5
 	proofNbf = -2 * time.Minute
 )
+
+func mungedURL(input *url.URL) *url.URL {
+	rv := new(url.URL)
+	*rv = *input
+	rv.Fragment = ""
+	rv.RawQuery = ""
+	rv.ForceQuery = false
+	return rv
+}
 
 func (p *proofer) ForRequest(r *http.Request, extraClaims interface{}) error {
 	builder := jwt.Signed(p.signer)
@@ -58,7 +69,7 @@ func (p *proofer) ForRequest(r *http.Request, extraClaims interface{}) error {
 	builder = builder.Claims(claims)
 	builder = builder.Claims(map[string]interface{}{
 		"http_method": r.Method,
-		"http_uri":    r.URL.String(),
+		"http_uri":    mungedURL(r.URL).String(),
 	})
 	if extraClaims != nil {
 		builder = builder.Claims(extraClaims)
@@ -69,6 +80,6 @@ func (p *proofer) ForRequest(r *http.Request, extraClaims interface{}) error {
 		return err
 	}
 
-	r.Header.Set(headerProof, token)
+	r.Header.Set(httpHeader, token)
 	return nil
 }

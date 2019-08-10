@@ -77,7 +77,7 @@ func TestExchange(t *testing.T) {
 		return &tokenResponse{
 			IDToken:     idToken,
 			AccessToken: accessToken,
-			TokenType:   "DPoP",
+			TokenType:   accessTokenType,
 			ExpiresIn:   300,
 		}, nil
 	}

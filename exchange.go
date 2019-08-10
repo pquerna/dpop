@@ -21,7 +21,7 @@ type TokenExchange struct {
 	Client *http.Client
 }
 
-// Exchange wraps the process of creating an OAuth Token exchange with a DPoP-Binding header.
+// Exchange wraps the process of creating an OAuth Token exchange with a DPoP header.
 func (be *TokenExchange) Exchange(ctx context.Context, code string, extra url.Values) (*oauth2.Token, error) {
 	var v url.Values
 	if extra != nil {

@@ -78,7 +78,6 @@ func (pv *ProofValidator) ValidateTokenRequest(req *http.Request) (*ProofClaims,
 //	       utilization, a JWT with the same "jti" value has not been
 //	       received previously (see Section 9.1).
 //
-//
 func (pv *ProofValidator) ValidateResourceAccess(req *http.Request, keyFingerprint string) (*ProofClaims, []byte, *jose.JSONWebKey, error) {
 	pc, raw, k, err :=  pv.validate(req)
 	if err != nil {

@@ -66,7 +66,6 @@ func (p *proofer) ForRequest(r *http.Request, extraClaims interface{}) error {
 		IssuedAt:  jwt.NewNumericDate(now),
 	}
 
-
 	builder = builder.Claims(claims)
 	builder = builder.Claims(map[string]interface{}{
 		"http_method": r.Method,

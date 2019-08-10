@@ -102,7 +102,7 @@ func TestExchange(t *testing.T) {
 	require.NoError(t, err)
 
 	be := TokenExchange{
-		Proof: b,
+		Proof:  b,
 		Config: config,
 	}
 
@@ -149,7 +149,7 @@ func TestExchange(t *testing.T) {
 	tb, err := pubkey.Thumbprint(crypto.SHA256)
 	require.NoError(t, err)
 	require.Equal(t, atCnf, base64.URLEncoding.EncodeToString(tb))
-	_, _,_, err = pv.ValidateResourceAccess(rsReq, atCnf)
+	_, _, _, err = pv.ValidateResourceAccess(rsReq, atCnf)
 	require.NoError(t, err)
 
 	t.Logf("DPoP Token Exchange JWT: %s", dpopBindingHeader)

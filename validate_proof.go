@@ -57,7 +57,7 @@ type ProofClaims struct {
 // JSONWebKey to a previously used value.
 //
 func (pv *ProofValidator) ValidateTokenRequest(req *http.Request) (*ProofClaims, []byte, *jose.JSONWebKey, error) {
-	pc, raw, k, err :=  pv.validate(req)
+	pc, raw, k, err := pv.validate(req)
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -79,7 +79,7 @@ func (pv *ProofValidator) ValidateTokenRequest(req *http.Request) (*ProofClaims,
 //	       received previously (see Section 9.1).
 //
 func (pv *ProofValidator) ValidateResourceAccess(req *http.Request, keyFingerprint string) (*ProofClaims, []byte, *jose.JSONWebKey, error) {
-	pc, raw, k, err :=  pv.validate(req)
+	pc, raw, k, err := pv.validate(req)
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -93,7 +93,7 @@ func (pv *ProofValidator) ValidateResourceAccess(req *http.Request, keyFingerpri
 		return nil, nil, nil, xerrors.Errorf("dpop: access token's key hash failed to base64 decode: %v", err)
 	}
 
-	if subtle.ConstantTimeCompare(jwkHash, atHash) == 0{
+	if subtle.ConstantTimeCompare(jwkHash, atHash) == 0 {
 		d := base64.URLEncoding.EncodeToString(jwkHash)
 		return nil, nil, nil, xerrors.Errorf("dpop: key mismatch: expected='%s' access_token_hash='%s'", d, keyFingerprint)
 	}
@@ -103,41 +103,41 @@ func (pv *ProofValidator) ValidateResourceAccess(req *http.Request, keyFingerpri
 
 func (pv *ProofValidator) validate(req *http.Request) (*ProofClaims, []byte, *jose.JSONWebKey, error) {
 	/*
-	4.2.  Checking DPoP Proofs
+		4.2.  Checking DPoP Proofs
 
-	   To check if a string that was received as part of an HTTP Request is
-	   a valid DPoP proof, the receiving server MUST ensure that
+		   To check if a string that was received as part of an HTTP Request is
+		   a valid DPoP proof, the receiving server MUST ensure that
 
-	   1.  the string value is a well-formed JWT,
+		   1.  the string value is a well-formed JWT,
 
-	   2.  all required claims are contained in the JWT,
+		   2.  all required claims are contained in the JWT,
 
-	   3.  the "typ" field in the header has the value "dpop+jwt",
+		   3.  the "typ" field in the header has the value "dpop+jwt",
 
-	   4.  the algorithm in the header of the JWT indicates an asymmetric
-	       digital signature algorithm, is not "none", is supported by the
-	       application, and is deemed secure,
+		   4.  the algorithm in the header of the JWT indicates an asymmetric
+		       digital signature algorithm, is not "none", is supported by the
+		       application, and is deemed secure,
 
-	   5.  that the JWT is signed using the public key contained in the
-	       "jwk" header of the JWT,
+		   5.  that the JWT is signed using the public key contained in the
+		       "jwk" header of the JWT,
 
-	   6.  the "http_method" claim matches the respective value for the HTTP
-	       request in which the JWT was received (case-insensitive),
+		   6.  the "http_method" claim matches the respective value for the HTTP
+		       request in which the JWT was received (case-insensitive),
 
-	   7.  the "http_uri" claims matches the respective value for the HTTP
-	       request in which the JWT was received, ignoring any query and
-	       fragment parts,
+		   7.  the "http_uri" claims matches the respective value for the HTTP
+		       request in which the JWT was received, ignoring any query and
+		       fragment parts,
 
-	   8.  the token was issued within an acceptable timeframe (see
-	       Section 9.1), and
+		   8.  the token was issued within an acceptable timeframe (see
+		       Section 9.1), and
 
-	   9.  that, within a reasonable consideration of accuracy and resource
-	       utilization, a JWT with the same "jti" value has not been
-	       received previously (see Section 9.1).
+		   9.  that, within a reasonable consideration of accuracy and resource
+		       utilization, a JWT with the same "jti" value has not been
+		       received previously (see Section 9.1).
 
-	   Servers SHOULD employ Syntax-Based Normalization and Scheme-Based
-	   Normalization in accordance with Section 6.2.2. and Section 6.2.3. of
-	   [RFC3986] before comparing the "http_uri" claim.
+		   Servers SHOULD employ Syntax-Based Normalization and Scheme-Based
+		   Normalization in accordance with Section 6.2.2. and Section 6.2.3. of
+		   [RFC3986] before comparing the "http_uri" claim.
 	*/
 
 	phdr := req.Header.Get(httpHeader)
@@ -214,9 +214,9 @@ func (pv *ProofValidator) validate(req *http.Request) (*ProofClaims, []byte, *jo
 		return nil, nil, nil, xerrors.Errorf("dpop: JWT http_uri claim mismatch in hostname: expected='%s' received='%s': %v", req.Host, claimUrl.Host, ErrProofMalformedClaim)
 	}
 
-	// if claimUrl.Scheme != "httpo" {
+	// if claimUrl.Scheme != "https" {
 	//	return nil, nil, nil, xerrors.Errorf("dpop: JWT http_uri claim mismatch in scheme: expected='https' received='%s': %v",  claimUrl.Scheme, ErrProofMalformedClaim)
-	// }
+	//}
 
 	var now time.Time
 	if pv.Now == nil {
@@ -231,7 +231,7 @@ func (pv *ProofValidator) validate(req *http.Request) (*ProofClaims, []byte, *jo
 	iat := claims.IssuedAt.Time()
 	d := absDuration(now.Sub(iat))
 
-	if d > time.Minute * 5 {
+	if d > time.Minute*5 {
 		return nil, nil, nil, xerrors.Errorf("dpop: JWT iat claim is more than 5 minutes from now: now='%s' iat='%s' %v", now.String(), iat.String(), ErrProofMalformedClaim)
 	}
 

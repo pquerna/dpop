@@ -5,7 +5,7 @@ const (
 	accessTokenType = `DPoP`
 
 	// 10.2.  JSON Web Signature and Encryption Type Values Registration
-	typDPOP   = `dpop+jwt`
+	typDPOP = `dpop+jwt`
 )
 
 const (

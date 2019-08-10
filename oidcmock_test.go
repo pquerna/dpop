@@ -296,7 +296,6 @@ func newOIDCTestProvider(t *testing.T, clientID string, clientSecret string) *oi
 	atSigner, err := jose.NewSigner(signingKey, &jose.SignerOptions{
 		ExtraHeaders: map[jose.HeaderKey]interface{}{
 			"kid":           keyID,
-			jose.HeaderType: jwtHeaderTypAT,
 		},
 	})
 	if err != nil {

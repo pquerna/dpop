@@ -4,7 +4,7 @@
 
 Go library for DPoP (OAuth 2.0 Demonstration of Proof-of-Possession at the Application Layer).
 
-This implementation is current for [draft-fett-oauth-dpop-01](https://tools.ietf.org/html/draft-fett-oauth-dpop-01), published April 2, 2019.
+This implementation is current for [draft-fett-oauth-dpop-02](https://tools.ietf.org/html/draft-fett-oauth-dpop-02), published July 8, 2019.
 
 # Usage
 
@@ -23,10 +23,11 @@ make
 # generates a new private key to use for signing
 demo-dpop create-key --key-name my-local-key
 
-# Outputs an example curl line with a DPoP-Binding header
-demo-dpop binding --key-name my-local-key --url https://as.example.com/token --method POST
+# Outputs an example curl line with a DPoP proof in a header, which can be used during a token exchange:
+demo-dpop proof --key-name my-local-key --url https://as.example.com/token --method POST
 
-# Outputs an example curl line with a DPoP-Proof header
+# Outputs an example curl line with a DPoP proof header, which can be used in conjunction with an access
+# token for a resource server access:
 demo-dpop proof --key-name my-local-key --url https://resource1.example.com/api/endpoint --method POST
 ```
 

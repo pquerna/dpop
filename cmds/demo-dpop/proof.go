@@ -2,12 +2,36 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"net/http"
 
 	"github.com/pquerna/dpop"
 	"github.com/urfave/cli"
 	"gopkg.in/square/go-jose.v2"
 )
+
+func getKey(c *cli.Context) (*jose.JSONWebKey, error) {
+	keyName := c.String("key-name")
+	if keyName == "" {
+		return nil, fmt.Errorf("--key-name is required")
+	}
+
+	keyId := keyNamePattern.ReplaceAllString(keyName, "_")
+	fn := keyId + ".jwk.key"
+
+	data, err := ioutil.ReadFile(fn)
+	if err != nil {
+		return nil, err
+	}
+
+	wk := &jose.JSONWebKey{}
+	err = wk.UnmarshalJSON(data)
+	if err != nil {
+		return nil, err
+	}
+
+	return wk, nil
+}
 
 var signProof = cli.Command{
 	Name:    "proof",
@@ -35,7 +59,7 @@ var signProof = cli.Command{
 			return err
 		}
 
-		p, err := dpop.NewProof(jose.SigningKey{
+		p, err := dpop.New(jose.SigningKey{
 			Key:       wk.Key,
 			Algorithm: jose.ES256,
 		})

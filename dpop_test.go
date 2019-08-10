@@ -36,7 +36,7 @@ func TestExchange(t *testing.T) {
 		require.NotEmpty(t, binding)
 
 		dpopBindingHeader = req.Header.Get(httpHeader)
-		bv := &ProofValidator{}
+		bv := &Validator{}
 		claims, rawClaims, bindingCnf, err := bv.ValidateTokenRequest(req)
 		if err != nil {
 			return nil, err
@@ -124,7 +124,7 @@ func TestExchange(t *testing.T) {
 	err = proofer.ForRequest(rsReq, nil)
 	require.NoError(t, err)
 
-	pv := &ProofValidator{}
+	pv := &Validator{}
 	skWebKey := jose.JSONWebKey{Key: privateKey}
 
 	atClaimsRaw, err := xjwt.VerifyRaw([]byte(token.AccessToken), xjwt.VerifyConfig{

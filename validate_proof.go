@@ -16,8 +16,8 @@ import (
 	"gopkg.in/square/go-jose.v2/jwt"
 )
 
-// ProofValidator validates DPoP-Proof headers on a resource server request.
-type ProofValidator struct {
+// ProofValidator validates DPoP proof headers
+type Validator struct {
 	xjwt.VerifyConfig
 }
 
@@ -56,7 +56,7 @@ type ProofClaims struct {
 // If this Client has previously used a DPoP binding at Token request, you may also wish to restrict the
 // JSONWebKey to a previously used value.
 //
-func (pv *ProofValidator) ValidateTokenRequest(req *http.Request) (*ProofClaims, []byte, *jose.JSONWebKey, error) {
+func (pv *Validator) ValidateTokenRequest(req *http.Request) (*ProofClaims, []byte, *jose.JSONWebKey, error) {
 	pc, raw, k, err := pv.validate(req)
 	if err != nil {
 		return nil, nil, nil, err
@@ -78,7 +78,7 @@ func (pv *ProofValidator) ValidateTokenRequest(req *http.Request) (*ProofClaims,
 //	       utilization, a JWT with the same "jti" value has not been
 //	       received previously (see Section 9.1).
 //
-func (pv *ProofValidator) ValidateResourceAccess(req *http.Request, keyFingerprint string) (*ProofClaims, []byte, *jose.JSONWebKey, error) {
+func (pv *Validator) ValidateResourceAccess(req *http.Request, keyFingerprint string) (*ProofClaims, []byte, *jose.JSONWebKey, error) {
 	pc, raw, k, err := pv.validate(req)
 	if err != nil {
 		return nil, nil, nil, err
@@ -101,7 +101,7 @@ func (pv *ProofValidator) ValidateResourceAccess(req *http.Request, keyFingerpri
 	return pc, raw, k, nil
 }
 
-func (pv *ProofValidator) validate(req *http.Request) (*ProofClaims, []byte, *jose.JSONWebKey, error) {
+func (pv *Validator) validate(req *http.Request) (*ProofClaims, []byte, *jose.JSONWebKey, error) {
 	/*
 		4.2.  Checking DPoP Proofs
 

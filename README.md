@@ -4,7 +4,7 @@
 
 Go library for DPoP (OAuth 2.0 Demonstration of Proof-of-Possession at the Application Layer).
 
-This implementation is current for [draft-fett-oauth-dpop-02](https://tools.ietf.org/html/draft-fett-oauth-dpop-02), published July 8, 2019.
+This implementation is current for [draft-fett-oauth-dpop-03](https://tools.ietf.org/html/draft-fett-oauth-dpop-03), published October 30, 2019.
 
 # Usage
 

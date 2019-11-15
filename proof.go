@@ -68,8 +68,8 @@ func (p *proofer) ForRequest(r *http.Request, extraClaims interface{}) error {
 
 	builder = builder.Claims(claims)
 	builder = builder.Claims(map[string]interface{}{
-		"http_method": r.Method,
-		"http_uri":    mungedURL(r.URL).String(),
+		claimHTTPMethod: r.Method,
+		claimHTTPURL:    mungedURL(r.URL).String(),
 	})
 	if extraClaims != nil {
 		builder = builder.Claims(extraClaims)

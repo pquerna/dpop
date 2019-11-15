@@ -31,8 +31,8 @@ var (
 // ProofClaims are common claims in the DPoP proof JWT.
 type ProofClaims struct {
 	jwt.Claims
-	HTTPMethod string `json:"http_method,omitempty"`
-	HTTPUri    string `json:"http_uri,omitempty"`
+	HTTPMethod string `json:"htm,omitempty"`
+	HTTPUri    string `json:"htu,omitempty"`
 }
 
 // ValidateTokenRequest parses and performs a PARTIAL validation of the DPoP proof JWT.
@@ -49,7 +49,7 @@ type ProofClaims struct {
 //  JSONWebKey: The caller must calculate the JWK SHA-256 Thumbprint, encoding it using base64url, and
 //  	embed it in any Access Tokens issued or make it available in the introspection request:
 //			tb, err := key.Thumbprint(crypto.SHA256)
-//  		jktS256 := base64.URLEncoding.EncodeToString(tb)
+//  		cnfThumbprint := base64.URLEncoding.EncodeToString(tb)
 //
 //  JSONWebKey: Algorithm and key type are acceptable.
 //
@@ -121,10 +121,10 @@ func (pv *Validator) validate(req *http.Request) (*ProofClaims, []byte, *jose.JS
 		   5.  that the JWT is signed using the public key contained in the
 		       "jwk" header of the JWT,
 
-		   6.  the "http_method" claim matches the respective value for the HTTP
+		   6.  the "htm" claim matches the respective value for the HTTP
 		       request in which the JWT was received (case-insensitive),
 
-		   7.  the "http_uri" claims matches the respective value for the HTTP
+		   7.  the "htu" claims matches the respective value for the HTTP
 		       request in which the JWT was received, ignoring any query and
 		       fragment parts,
 

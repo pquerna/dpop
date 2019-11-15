@@ -65,7 +65,7 @@ func TestExchange(t *testing.T) {
 				"client_id": clientId,
 				"scopes":    "openid example.com/api",
 				"cnf": map[string]interface{}{
-					jktS256: base64.URLEncoding.EncodeToString(tb),
+					cnfThumbprint: base64.URLEncoding.EncodeToString(tb),
 				},
 			})
 		accessToken, err := builder.CompactSerialize()
@@ -143,7 +143,7 @@ func TestExchange(t *testing.T) {
 	err = json.Unmarshal(atClaimsRaw, atc)
 	require.NoError(t, err)
 
-	atCnf := atc.Cnf[jktS256]
+	atCnf := atc.Cnf[cnfThumbprint]
 	require.NotEmpty(t, atCnf)
 	pubkey := skWebKey.Public()
 	tb, err := pubkey.Thumbprint(crypto.SHA256)

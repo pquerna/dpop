@@ -13,5 +13,7 @@ const (
 )
 
 const (
-	jktS256 = "jkt#S256"
+	cnfThumbprint = "jkt"
+	claimHTTPMethod = "htm"
+	claimHTTPURL = "htu"
 )
